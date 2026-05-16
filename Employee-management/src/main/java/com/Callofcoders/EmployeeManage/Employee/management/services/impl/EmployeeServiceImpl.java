@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
@@ -43,4 +46,25 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void deleteById(Long employeeId) {
         employeeRepository.deleteById(employeeId);
     }
+
+    @Override
+    public List<EmployeeDto> getAllEmployees() {
+        List<EmployeeEntity> listOfEmployees = employeeRepository.findAll();
+        return listOfEmployees.stream()
+                .map(employeeEntity -> mapToDto(employeeEntity))
+         //     .map(this::mapToDto())             or use this
+          //    .map(employeeEntity ->modelMapper.map(employeeEntity,EmployeeDto.class))   or use modelMapper
+                .collect(Collectors.toList());
+    }
+
+    private EmployeeDto mapToDto(EmployeeEntity employeeEntity){
+        EmployeeDto dto = new EmployeeDto();
+        dto.setId(employeeEntity.getId());
+        dto.setName(employeeEntity.getName());
+        dto.setEmail(employeeEntity.getEmail());
+        dto.setSalary(employeeEntity.getSalary());
+
+        return dto;
+    }
+
 }

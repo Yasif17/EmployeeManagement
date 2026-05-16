@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/employees")
 @RequiredArgsConstructor
@@ -20,12 +22,18 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeDto);
     }
 
+    @GetMapping
+    public ResponseEntity<List<EmployeeDto>> getAllEmployees(){
+        List<EmployeeDto> listOfEmployees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(listOfEmployees);
+    }
+
 
 
     @PostMapping
     public ResponseEntity<EmployeeDto> createNewEmployee(@RequestBody EmployeeDto employeeDto){
         EmployeeDto createNewEmployeeDto = employeeService.createNewEmployee(employeeDto);
-        return new ResponseEntity<>(createNewEmployeeDto,HttpStatus.CREATED);
+        return  ResponseEntity.status(HttpStatus.CREATED).body(createNewEmployeeDto);
     }
 
     @PutMapping("/{id}")

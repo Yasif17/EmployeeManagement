@@ -13,15 +13,18 @@ public class AppConfig {
     @Bean
     public ModelMapper modelMapper(){
         ModelMapper mapper = new ModelMapper();
-        // ✅ Set strict matching strategy
+
         mapper.getConfiguration()
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
                 .setMatchingStrategy(MatchingStrategies.STRICT);
 
-        // ✅ Skip the "id" field
+        // ✅ Dto → Entity (for save/update) — skip id
         mapper.typeMap(EmployeeDto.class, EmployeeEntity.class)
                 .addMappings(m -> m.skip(EmployeeEntity::setId));
+
+        // ✅ Entity → Dto (for getAllEmployees) — map all fields
+        mapper.typeMap(EmployeeEntity.class, EmployeeDto.class);
 
         return mapper;
     }
