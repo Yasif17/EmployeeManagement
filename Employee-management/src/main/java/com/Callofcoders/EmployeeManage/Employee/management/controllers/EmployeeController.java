@@ -2,6 +2,7 @@ package com.Callofcoders.EmployeeManage.Employee.management.controllers;
 
 import com.Callofcoders.EmployeeManage.Employee.management.dtos.EmployeeDto;
 import com.Callofcoders.EmployeeManage.Employee.management.services.EmployeeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,15 +32,21 @@ public class EmployeeController {
 
 
     @PostMapping
-    public ResponseEntity<EmployeeDto> createNewEmployee(@RequestBody EmployeeDto employeeDto){
+    public ResponseEntity<EmployeeDto> createNewEmployee(@Valid @RequestBody EmployeeDto employeeDto){
         EmployeeDto createNewEmployeeDto = employeeService.createNewEmployee(employeeDto);
         return  ResponseEntity.status(HttpStatus.CREATED).body(createNewEmployeeDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeDto> updateEmployeeById(@PathVariable Long id,@RequestBody EmployeeDto employeeDto){
+    public ResponseEntity<EmployeeDto> updateEmployeeById(@PathVariable Long id,@Valid @RequestBody EmployeeDto employeeDto){
         EmployeeDto updateEmployee = employeeService.updateById(id,employeeDto);
         return ResponseEntity.ok(updateEmployee);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<EmployeeDto> patchEmployeeById(@PathVariable Long id,@RequestBody EmployeeDto employeeDto){
+        EmployeeDto patchEmployeeDto = employeeService.patchById(id,employeeDto);
+        return ResponseEntity.ok(patchEmployeeDto);
     }
 
 

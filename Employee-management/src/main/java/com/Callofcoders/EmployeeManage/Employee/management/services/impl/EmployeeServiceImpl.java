@@ -6,7 +6,6 @@ import com.Callofcoders.EmployeeManage.Employee.management.exceptions.ResourceNo
 import com.Callofcoders.EmployeeManage.Employee.management.repositories.EmployeeRepository;
 import com.Callofcoders.EmployeeManage.Employee.management.services.EmployeeService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,29 +16,47 @@ import java.util.stream.Collectors;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-    private final ModelMapper modelMapper;
 
     @Override
     public EmployeeDto getEmployeeById(Long id) {
         EmployeeEntity employeeEntity = employeeRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Employee Not found with id "+id));
-        return modelMapper.map(employeeEntity,EmployeeDto.class);
+                .orElseThrow(() -> new ResourceNotFoundException("Employee Not found with id " + id));
+        return mapToDto(employeeEntity); // ✅ manual mapping
     }
 
     @Override
     public EmployeeDto createNewEmployee(EmployeeDto employeeDto) {
-        EmployeeEntity newEmployee = modelMapper.map(employeeDto,EmployeeEntity.class);
-        EmployeeEntity savingNewEmployee = employeeRepository.save(newEmployee);
-        return modelMapper.map(savingNewEmployee,EmployeeDto.class);
+        EmployeeEntity newEmployee = mapToEntity(employeeDto); // ✅ manual mapping
+        EmployeeEntity savedEmployee = employeeRepository.save(newEmployee);
+        return mapToDto(savedEmployee); // ✅ manual mapping
     }
 
     @Override
     public EmployeeDto updateById(Long id, EmployeeDto employeeDto) {
-        EmployeeEntity updateEmployee = employeeRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("Employee Not found with id "+id));
-        modelMapper.map(employeeDto,updateEmployee);
-        EmployeeEntity savedUpdatedEmployee = employeeRepository.save(updateEmployee);
-        return modelMapper.map(savedUpdatedEmployee,EmployeeDto.class) ;
+        EmployeeEntity existingEmployee = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee Not found with id " + id));
+
+        // ✅ no null check — replace everything client sends
+        existingEmployee.setName(employeeDto.getName());
+        existingEmployee.setEmail(employeeDto.getEmail());
+        existingEmployee.setSalary(employeeDto.getSalary());
+
+        EmployeeEntity savedEmployee = employeeRepository.save(existingEmployee);
+        return mapToDto(savedEmployee);
+    }
+
+    @Override
+    public EmployeeDto patchById(Long id, EmployeeDto employeeDto) {
+        EmployeeEntity existingEmployee = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee Not found with id " + id));
+
+        // ✅ null check — only update what client sends
+        if(employeeDto.getName() != null) existingEmployee.setName(employeeDto.getName());
+        if(employeeDto.getEmail() != null) existingEmployee.setEmail(employeeDto.getEmail());
+        if(employeeDto.getSalary() != null) existingEmployee.setSalary(employeeDto.getSalary());
+
+        EmployeeEntity savedEmployee = employeeRepository.save(existingEmployee);
+        return mapToDto(savedEmployee);
     }
 
     @Override
@@ -49,22 +66,31 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<EmployeeDto> getAllEmployees() {
-        List<EmployeeEntity> listOfEmployees = employeeRepository.findAll();
-        return listOfEmployees.stream()
-                .map(employeeEntity -> mapToDto(employeeEntity))
-         //     .map(this::mapToDto())             or use this
-          //    .map(employeeEntity ->modelMapper.map(employeeEntity,EmployeeDto.class))   or use modelMapper
+        return employeeRepository.findAll()
+                .stream()
+                .map(entity -> mapToDto(entity)) // ✅ manual mapping
+//              .map(this::mapToDto())             or use this
+//              .map(employeeEntity ->modelMapper.map(employeeEntity,EmployeeDto.class))   or use modelMapper
                 .collect(Collectors.toList());
     }
 
-    private EmployeeDto mapToDto(EmployeeEntity employeeEntity){
+    // ✅ Entity → Dto
+    private EmployeeDto mapToDto(EmployeeEntity entity) {
         EmployeeDto dto = new EmployeeDto();
-        dto.setId(employeeEntity.getId());
-        dto.setName(employeeEntity.getName());
-        dto.setEmail(employeeEntity.getEmail());
-        dto.setSalary(employeeEntity.getSalary());
-
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setEmail(entity.getEmail());
+        dto.setSalary(entity.getSalary());
         return dto;
     }
 
+    // ✅ Dto → Entity
+    private EmployeeEntity mapToEntity(EmployeeDto dto) {
+        EmployeeEntity entity = new EmployeeEntity();
+        entity.setName(dto.getName());
+        entity.setEmail(dto.getEmail());
+        entity.setSalary(dto.getSalary());
+        // id skipped — DB generates it automatically
+        return entity;
+    }
 }

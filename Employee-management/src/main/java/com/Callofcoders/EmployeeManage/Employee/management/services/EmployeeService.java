@@ -1,8 +1,7 @@
 package com.Callofcoders.EmployeeManage.Employee.management.services;
 
 import com.Callofcoders.EmployeeManage.Employee.management.dtos.EmployeeDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -17,4 +16,7 @@ public interface EmployeeService {
     void deleteById(Long employeeId);
 
     List<EmployeeDto> getAllEmployees();
+
+    EmployeeDto patchById(Long id,EmployeeDto employeeDto);
+
 }
