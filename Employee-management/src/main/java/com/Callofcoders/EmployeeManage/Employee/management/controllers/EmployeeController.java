@@ -2,6 +2,8 @@ package com.Callofcoders.EmployeeManage.Employee.management.controllers;
 
 import com.Callofcoders.EmployeeManage.Employee.management.dtos.EmployeeDto;
 import com.Callofcoders.EmployeeManage.Employee.management.services.EmployeeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,10 +15,12 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/employees")
 @RequiredArgsConstructor
+@Tag(name = "Employee", description = "Employee Management APIs")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
 
+    @Operation(summary = "Get employee by ID")
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long id){
         EmployeeDto employeeDto = employeeService.getEmployeeById(id);
@@ -31,6 +35,7 @@ public class EmployeeController {
 
 
 
+    @Operation(summary = "Create new employee")
     @PostMapping
     public ResponseEntity<EmployeeDto> createNewEmployee(@Valid @RequestBody EmployeeDto employeeDto){
         EmployeeDto createNewEmployeeDto = employeeService.createNewEmployee(employeeDto);
